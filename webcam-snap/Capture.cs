@@ -68,7 +68,7 @@ namespace webcamsnap
 				cam.Init();
 				cam.CaptureImage();
 				cam.CloseInterfaces();
-			
+
 				Image image = (Image)cam.image.Clone();
 				cam = null;
 				return image;
