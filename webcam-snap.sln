@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "webcam-snap", "webcam-snap\webcam-snap.csproj", "{DFE26680-95AB-4CD1-A180-256D7571A93F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DFE26680-95AB-4CD1-A180-256D7571A93F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFE26680-95AB-4CD1-A180-256D7571A93F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFE26680-95AB-4CD1-A180-256D7571A93F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DFE26680-95AB-4CD1-A180-256D7571A93F}.Debug|x86.Build.0 = Debug|Any CPU
+		{DFE26680-95AB-4CD1-A180-256D7571A93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFE26680-95AB-4CD1-A180-256D7571A93F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFE26680-95AB-4CD1-A180-256D7571A93F}.Release|x86.ActiveCfg = Release|x86
+		{DFE26680-95AB-4CD1-A180-256D7571A93F}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
