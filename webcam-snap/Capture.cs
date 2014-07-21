@@ -9,7 +9,9 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Diagnostics;
 
@@ -23,6 +25,8 @@ namespace webcamsnap
 	/// <summary> Summary description for MainForm. </summary>
 	public class Capture : ISampleGrabberCB
 	{
+		// creating singlton for speed-up working 
+		private static readonly Capture camInstance = new Capture();
 
 		// so we can wait for the async job to finish
 		private ManualResetEvent reset = new ManualResetEvent(false);
@@ -53,29 +57,28 @@ namespace webcamsnap
 		private	byte[]					savedArray;
 
 		/// <summary> list of installed video devices. </summary>
-		private ArrayList				capDevices;
+		private List<DsDevice>			_capDevices = new List<DsDevice>();
+
+		
 
 		private Capture()
 		{
+			camInstance.Init();
 		}
 
 		public static Image GetImage()
 		{
-			Capture cam = new Capture();
-
 			try
-			{
-				cam.Init();
-				cam.CaptureImage();
-				cam.CloseInterfaces();
+			{				
+				camInstance.CaptureImage();
+				camInstance.CloseInterfaces();
 
-				Image image = (Image)cam.image.Clone();
-				cam = null;
+				Image image = (Image)camInstance.image.Clone();
 				return image;
 			}
 			catch (Exception ex)
 			{
-				cam.CloseInterfaces();
+				camInstance.CloseInterfaces();
 				Debug.WriteLine(ex);
 				return null;
 			}
@@ -83,19 +86,17 @@ namespace webcamsnap
 
 		public static Image GetImage(DsDevice device)
 		{
-			Capture cam = new Capture();
-
 			try
 			{
-				cam.Init(device);
-				cam.CaptureImage();
-				cam.CloseInterfaces();
-			
-				return cam.image;
+				camInstance.SelectDevice(device);
+				camInstance.CaptureImage();
+				camInstance.CloseInterfaces();
+
+				return camInstance.image;
 			}
 			catch (Exception ex)
 			{
-				cam.CloseInterfaces();
+				camInstance.CloseInterfaces();
 				Debug.WriteLine(ex);
 				return null;
 			}
@@ -120,8 +121,7 @@ namespace webcamsnap
 		}
 
 		private void CaptureImage()
-		{
-		
+		{		
 			int hr;
 			if( sampGrabber == null )
 				return;
@@ -148,22 +148,23 @@ namespace webcamsnap
 				throw new Exception("DirectX 8.1 NOT installed!");
 			}
 
+			ArrayList capDevices = null;
 			if( ! DsDev.GetDevicesOfCat( FilterCategory.VideoInputDevice, out capDevices ) )
 			{
 				throw new Exception("No video capture devices found!");
 			}
 
-			DsDevice dev = capDevices[0] as DsDevice;
+			foreach (var capDev in capDevices)
+			{
+				DsDevice dev = capDev as DsDevice;
+				_capDevices.Add(dev);
+			}
 
-			StartupVideo( dev.Mon );
+			SelectDevice(_capDevices[0]);
 		}
 
-		private void Init(DsDevice device)
+		private void SelectDevice(DsDevice device)
 		{
-			// store it for clean up.
-			capDevices = new ArrayList();
-			capDevices.Add(device);
-
 			StartupVideo( device.Mon );
 		}
 
@@ -190,9 +191,8 @@ namespace webcamsnap
 		}
 
 
-
 		/// <summary> start all the interfaces, graphs and preview window. </summary>
-		private bool StartupVideo( UCOMIMoniker mon )
+		private bool StartupVideo(UCOMIMoniker mon)
 		{
 			int hr;
 			if( ! CreateCaptureDevice( mon ) )
@@ -316,17 +316,18 @@ namespace webcamsnap
 			{
 				Guid gbf = typeof( IBaseFilter ).GUID;
 				mon.BindToObject( null, null, ref gbf, out capObj );
-				capFilter = (IBaseFilter) capObj; capObj = null;
+				capFilter = (IBaseFilter) capObj;
+				capObj = null;
 				return true;
 			}
 			catch( Exception ee )
 			{
 				if( capObj != null )
-					Marshal.ReleaseComObject( capObj ); capObj = null;
+					Marshal.ReleaseComObject( capObj ); 
+				capObj = null;
 				throw ee;
 			}
 		}
-
 
 
 		/// <summary>
@@ -390,12 +391,12 @@ namespace webcamsnap
 
 			try 
 			{
-				if( capDevices != null )
+				if( _capDevices != null )
 				{
-					foreach( DsDevice d in capDevices )
+					foreach( DsDevice d in _capDevices )
 						d.Dispose();
 
-					capDevices = null;
+					_capDevices = null;
 				}
 			}
 			catch (Exception ex)
