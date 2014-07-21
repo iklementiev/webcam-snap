@@ -219,3 +219,5 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+*.exe
+webcam-snap/bin/Debug/webcam-snap.exe
